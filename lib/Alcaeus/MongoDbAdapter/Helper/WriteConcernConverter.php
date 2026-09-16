@@ -35,7 +35,7 @@ trait WriteConcernConverter
         }
 
         // Ensure wtimeout is not < 0
-        return new \MongoDB\Driver\WriteConcern($wstring, max($wtimeout, 0));
+        return new \MongoDB\Driver\WriteConcern($wstring, max((int) $wtimeout, 0));
     }
 
     /**
