@@ -246,7 +246,7 @@ class MongoCollection
      */
     public function drop()
     {
-        return TypeConverter::toLegacy($this->collection->drop());
+        return self::legacyCommandResult($this->collection->drop());
     }
 
     /**
@@ -499,7 +499,7 @@ class MongoCollection
      * @param array $options An array of options to apply, such as remove the match document from the DB and return it.
      * @return array Returns the original document, or the modified document when new is set.
      */
-    public function findAndModify(array $query, array $update = null, array $fields = null, array $options = [])
+    public function findAndModify(array $query, ?array $update = null, ?array $fields = null, array $options = [])
     {
         $query = TypeConverter::fromLegacy($query);
         try {
@@ -684,7 +684,7 @@ class MongoCollection
         }
 
         try {
-            return TypeConverter::toLegacy($this->collection->dropIndex($indexName));
+            return self::legacyCommandResult($this->collection->dropIndex($indexName));
         } catch (\MongoDB\Driver\Exception\Exception $e) {
             return ExceptionConverter::toResultArray($e) + ['nIndexesWas' => count($this->getIndexInfo())];
         }
@@ -699,7 +699,7 @@ class MongoCollection
     public function deleteIndexes()
     {
         try {
-            return TypeConverter::toLegacy($this->collection->dropIndexes());
+            return self::legacyCommandResult($this->collection->dropIndexes());
         } catch (\MongoDB\Driver\Exception\Exception $e) {
             return ExceptionConverter::toResultArray($e);
         }
@@ -718,7 +718,7 @@ class MongoCollection
                 'v' => $indexInfo->getVersion(),
                 'key' => $indexInfo->getKey(),
                 'name' => $indexInfo->getName(),
-                'ns' => $indexInfo->getNamespace(),
+                'ns' => method_exists($indexInfo, 'getNamespace') ? $indexInfo->getNamespace() : (string) $this,
             ];
 
             $additionalKeys = [
@@ -1070,4 +1070,18 @@ class MongoCollection
             throw new \MongoException('document must be an array or object');
         }
     }
+
+    /**
+     * @param mixed $result
+     * @return array
+     */
+    protected static function legacyCommandResult($result)
+    {
+        if ($result === null) {
+            return ['ok' => 1.0];
+        }
+
+        return TypeConverter::toLegacy($result);
+    }
+
 }

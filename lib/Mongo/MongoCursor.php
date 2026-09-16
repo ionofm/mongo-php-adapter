@@ -47,6 +47,7 @@ class MongoCursor extends AbstractCursor implements Iterator, Countable, MongoCu
         'allowPartialResults',
         'batchSize',
         'cursorType',
+        'hint',
         'limit',
         'maxTimeMS',
         'modifiers',

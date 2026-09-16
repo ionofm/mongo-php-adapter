@@ -258,7 +258,7 @@ class MongoDB
      */
     public function drop()
     {
-        return TypeConverter::toLegacy($this->db->drop());
+        return self::legacyCommandResult($this->db->drop());
     }
 
     /**
@@ -331,7 +331,7 @@ class MongoDB
             $coll = $coll->getName();
         }
 
-        return TypeConverter::toLegacy($this->db->dropCollection((string) $coll));
+        return self::legacyCommandResult($this->db->dropCollection((string) $coll));
     }
 
     /**
@@ -565,4 +565,18 @@ class MongoDB
     {
         return ['connection', 'name'];
     }
+
+    /**
+     * @param mixed $result
+     * @return array
+     */
+    protected static function legacyCommandResult($result)
+    {
+        if ($result === null) {
+            return ['ok' => 1.0];
+        }
+
+        return TypeConverter::toLegacy($result);
+    }
+
 }
